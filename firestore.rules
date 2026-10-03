@@ -4,7 +4,7 @@ service cloud.firestore {
     // Assessment dev rules (test mode): open access with a time bomb,
     // mirroring the Firebase console's "test mode" default.
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2026, 10, 7);
+      allow read, write: if request.time < timestamp.date(2026, 12, 31);
     }
   }
 }

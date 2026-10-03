@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../models/call_request.dart';
+import '../utils/app_colors.dart';
 import '../utils/app_strings.dart';
 import '../utils/app_text_styles.dart';
 
@@ -38,10 +39,10 @@ class _UpcomingCallBannerState extends State<UpcomingCallBanner> {
   @override
   void initState() {
     super.initState();
-    // Re-check the join window periodically so the button appears
-    // without a manual refresh.
     _ticker = Timer.periodic(
-        const Duration(seconds: 30), (_) => setState(() {}));
+      const Duration(seconds: 30),
+      (_) => setState(() {}),
+    );
   }
 
   @override
@@ -56,53 +57,132 @@ class _UpcomingCallBannerState extends State<UpcomingCallBanner> {
       stream: widget.approvedStream,
       builder: (context, snap) {
         final now = DateTime.now();
-        final upcoming = (snap.data ?? [])
-            .where((r) =>
-                r.status == CallStatus.approved &&
-                r.scheduledFor
-                    .isAfter(now.subtract(const Duration(minutes: 30))))
-            .toList()
-          ..sort((a, b) => a.scheduledFor.compareTo(b.scheduledFor));
+        final upcoming =
+            (snap.data ?? [])
+                .where(
+                  (r) =>
+                      r.status == CallStatus.approved &&
+                      r.scheduledFor.isAfter(
+                        now.subtract(const Duration(minutes: 30)),
+                      ),
+                )
+                .toList()
+              ..sort((a, b) => a.scheduledFor.compareTo(b.scheduledFor));
+
         if (upcoming.isEmpty) return const SizedBox.shrink();
 
         final next = upcoming.first;
         final joinable = isJoinable(next, now);
-        return Card(
-          color: widget.roleColor.withValues(alpha: 0.06),
-          child: Padding(
-            padding: const EdgeInsets.all(Gap.s16),
-            child: Row(
-              children: [
-                Icon(Icons.videocam, color: widget.roleColor),
-                const SizedBox(width: Gap.s8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(AppStrings.upcomingCalls,
-                          style: AppTextStyles.caption),
-                      Text(
-                        DateFormat('EEE d MMM • h:mm a')
-                            .format(next.scheduledFor),
-                        style: AppTextStyles.body,
-                      ),
-                    ],
-                  ),
-                ),
-                FilledButton.icon(
-                  style:
-                      FilledButton.styleFrom(backgroundColor: widget.roleColor),
-                  onPressed: joinable ? () => widget.onJoin(next) : null,
-                  icon: const Icon(Icons.videocam, size: 18),
-                  label: Text(joinable
-                      ? AppStrings.joinCall
-                      : DateFormat('h:mm a').format(next.scheduledFor)),
-                ),
+
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                widget.roleColor,
+                widget.roleColor.withValues(alpha: 0.85),
               ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          padding: const EdgeInsets.all(Gap.s16),
+          child: Row(
+            children: [
+              // Icon column
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.videocam_rounded,
+                  color: AppColors.white,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: Gap.s12),
+              // Info column
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppStrings.upcomingCalls,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.white.withValues(alpha: 0.8),
+                      ),
+                    ),
+                    const SizedBox(height: Gap.s2),
+                    Text(
+                      DateFormat(
+                        'EEE d MMM • h:mm a',
+                      ).format(next.scheduledFor),
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: Gap.s8),
+              // Join CTA
+              _JoinButton(
+                joinable: joinable,
+                scheduledFor: next.scheduledFor,
+                onJoin: () => widget.onJoin(next),
+              ),
+            ],
           ),
         );
       },
+    );
+  }
+}
+
+class _JoinButton extends StatelessWidget {
+  final bool joinable;
+  final DateTime scheduledFor;
+  final VoidCallback onJoin;
+
+  const _JoinButton({
+    required this.joinable,
+    required this.scheduledFor,
+    required this.onJoin,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: joinable
+              ? AppColors.white
+              : AppColors.white.withValues(alpha: 0.25),
+          foregroundColor: joinable ? AppColors.guruPrimary : AppColors.white,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          minimumSize: const Size(80, 38),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Gap.s12,
+            vertical: Gap.s8,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          textStyle: AppTextStyles.label,
+        ),
+        onPressed: joinable ? onJoin : null,
+        icon: const Icon(Icons.videocam_rounded, size: 16),
+        label: Text(
+          joinable
+              ? AppStrings.joinCall
+              : DateFormat('h:mm a').format(scheduledFor),
+        ),
+      ),
     );
   }
 }

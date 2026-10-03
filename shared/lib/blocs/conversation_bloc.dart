@@ -7,6 +7,8 @@ import '../models/message.dart';
 import '../services/chat_service.dart';
 import '../utils/app_exception.dart';
 import '../utils/app_toast.dart';
+import '../utils/app_strings.dart';
+import '../utils/wtf_logger.dart';
 
 sealed class ConversationEvent {
   const ConversationEvent();
@@ -36,6 +38,11 @@ class LoadOlderRequested extends ConversationEvent {
 class _MessagesChanged extends ConversationEvent {
   final List<Message> messages;
   const _MessagesChanged(this.messages);
+}
+
+class _MessagesFailed extends ConversationEvent {
+  final Object error;
+  const _MessagesFailed(this.error);
 }
 
 class _SummaryChanged extends ConversationEvent {
@@ -88,6 +95,7 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     on<AttachmentSent>(_onAttachmentSent);
     on<LoadOlderRequested>(_onLoadOlder);
     on<_MessagesChanged>(_onMessagesChanged);
+    on<_MessagesFailed>(_onMessagesFailed);
     on<_SummaryChanged>((event, emit) =>
         emit(state.copyWith(peerTyping: event.summary.typingUserId == peer.id)));
   }
@@ -96,7 +104,8 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     _messagesSub?.cancel();
     _messagesSub = _chat
         .watchMessages(chatId, limit: _limit)
-        .listen((m) => add(_MessagesChanged(m)));
+        .listen((m) => add(_MessagesChanged(m)),
+            onError: (Object e) => add(_MessagesFailed(e)));
   }
 
   Future<void> _onOpened(
@@ -114,6 +123,15 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
     final hasUnread = event.messages.any(
         (m) => m.receiverId == me.id && m.status == MessageStatus.sent);
     if (hasUnread) await _chat.markRead(chatId, me.id);
+  }
+
+  // Stream failure (offline, rules, missing index) → stop the spinner
+  // instead of loading forever; Firestore keeps retrying in the background.
+  void _onMessagesFailed(
+      _MessagesFailed event, Emitter<ConversationState> emit) {
+    WtfLog.d(LogTag.chat, 'watchMessages failed: ${event.error}');
+    emit(state.copyWith(loading: false));
+    AppToast.error(AppStrings.genericError);
   }
 
   Future<void> _onTextSent(

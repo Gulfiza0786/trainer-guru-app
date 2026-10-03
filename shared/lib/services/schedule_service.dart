@@ -54,9 +54,10 @@ class FirebaseScheduleService implements ScheduleService {
   @override
   Stream<List<CallRequest>> watchForMember(String memberId) => _requests
       .where('memberId', isEqualTo: memberId)
-      .orderBy('requestedAt', descending: true)
       .snapshots()
-      .map(_fromSnap);
+      // Sorted client-side: where + orderBy would need a composite index.
+      .map((snap) => _fromSnap(snap)
+        ..sort((a, b) => b.requestedAt.compareTo(a.requestedAt)));
 
   @override
   Stream<List<CallRequest>> watchPendingForTrainer(String trainerId) =>

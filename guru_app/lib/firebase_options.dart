@@ -26,7 +26,10 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for ios - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -50,18 +53,10 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA6-Ox9s221tmYnNbi77zMiEzEPvEyIJ7E',
-    appId: '1:492006265796:android:4e2696e7dc8f4353e78a91',
-    messagingSenderId: '492006265796',
-    projectId: 'wtf-gym-9f74c',
-    storageBucket: 'wtf-gym-9f74c.firebasestorage.app',
-  );
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCHMIGjiL6i5ZDcTjy_Ki8lc_ve3Y1wH88',
-    appId: '1:492006265796:ios:4d83aa524933ffa6e78a91',
-    messagingSenderId: '492006265796',
-    projectId: 'wtf-gym-9f74c',
-    storageBucket: 'wtf-gym-9f74c.firebasestorage.app',
-    iosBundleId: 'com.wtf.guruApp',
+    apiKey: 'AIzaSyDt16iwCOK2-ZvdbLls7EWotK8bNrdQPJs',
+    appId: '1:322913591060:android:47dba31edea95135e56c01',
+    messagingSenderId: '322913591060',
+    projectId: 'wtf-gym-mine',
+    storageBucket: 'wtf-gym-mine.firebasestorage.app',
   );
 }

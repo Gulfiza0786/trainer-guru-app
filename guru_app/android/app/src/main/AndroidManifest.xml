@@ -40,6 +40,15 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Older/emulated GPUs (API < 29) deadlock with Impeller + the merged
+             platform/UI thread, causing ANRs on tap. Use Skia on a separate UI
+             thread instead. -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
+        <meta-data
+            android:name="io.flutter.embedding.android.DisableMergedPlatformUIThread"
+            android:value="true" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

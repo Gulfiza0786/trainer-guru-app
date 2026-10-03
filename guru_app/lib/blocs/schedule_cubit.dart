@@ -25,14 +25,13 @@ class ScheduleState {
     String? note,
     bool? submitting,
     List<CallRequest>? myRequests,
-  }) =>
-      ScheduleState(
-        day: day ?? this.day,
-        slot: clearSlot ? null : (slot ?? this.slot),
-        note: note ?? this.note,
-        submitting: submitting ?? this.submitting,
-        myRequests: myRequests ?? this.myRequests,
-      );
+  }) => ScheduleState(
+    day: day ?? this.day,
+    slot: clearSlot ? null : (slot ?? this.slot),
+    note: note ?? this.note,
+    submitting: submitting ?? this.submitting,
+    myRequests: myRequests ?? this.myRequests,
+  );
 }
 
 /// Guru scheduling (spec §3C): pick a day (next 3), a 30-min slot, add a
@@ -43,11 +42,15 @@ class ScheduleCubit extends Cubit<ScheduleState> {
   StreamSubscription<List<CallRequest>>? _sub;
 
   ScheduleCubit({required ScheduleService schedule, required this.me})
-      : _schedule = schedule,
-        super(ScheduleState(day: DateTime.now())) {
+    : _schedule = schedule,
+      super(ScheduleState(day: DateTime.now())) {
     _sub = _schedule
         .watchForMember(me.id)
-        .listen((reqs) => emit(state.copyWith(myRequests: reqs)));
+        .listen(
+          (reqs) => emit(state.copyWith(myRequests: reqs)),
+          onError: (Object e) =>
+              WtfLog.d(LogTag.schedule, 'my requests stream failed: $e'),
+        );
   }
 
   void pickDay(DateTime day) => emit(state.copyWith(day: day, clearSlot: true));
@@ -71,15 +74,17 @@ class ScheduleCubit extends Cubit<ScheduleState> {
       final conflict = checkSlotConflict(slot, approved);
       if (conflict != null) return conflict;
 
-      await _schedule.create(CallRequest(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        memberId: me.id,
-        trainerId: me.assignedTrainerId ?? SeedIds.trainerAarav,
-        requestedAt: DateTime.now(),
-        scheduledFor: slot,
-        note: state.note.trim(),
-        status: CallStatus.pending,
-      ));
+      await _schedule.create(
+        CallRequest(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          memberId: me.id,
+          trainerId: me.assignedTrainerId ?? SeedIds.trainerAarav,
+          requestedAt: DateTime.now(),
+          scheduledFor: slot,
+          note: state.note.trim(),
+          status: CallStatus.pending,
+        ),
+      );
       emit(state.copyWith(clearSlot: true, note: ''));
       return null;
     } on AppException catch (e) {

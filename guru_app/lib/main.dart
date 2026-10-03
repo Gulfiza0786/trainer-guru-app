@@ -11,8 +11,10 @@ import 'screens/onboarding_screen.dart';
 /// Singleton services shared across the guru app.
 final authService = FirebaseAuthService();
 final chatService = FirebaseChatService();
-final scheduleService =
-    FirebaseScheduleService(api: ApiService.instance, chat: chatService);
+final scheduleService = FirebaseScheduleService(
+  api: ApiService.instance,
+  chat: chatService,
+);
 final logService = FirebaseLogService();
 final callService = AgoraCallService(api: ApiService.instance);
 
@@ -48,15 +50,15 @@ class _Root extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) => switch (state) {
-        AuthLoading() =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
-        AuthOnboarding(:final trainers) =>
-          OnboardingScreen(trainers: trainers),
+        AuthLoading() => const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+        AuthOnboarding(:final trainers) => OnboardingScreen(trainers: trainers),
         AuthReady(:final user) => DevPanel(
-            appName: 'Guru',
-            env: const {'TOKEN_URL': ApiEndpoints.baseUrl},
-            child: _NotificationGate(user: user),
-          ),
+          appName: 'Guru',
+          env: const {'TOKEN_URL': ApiEndpoints.baseUrl},
+          child: _NotificationGate(user: user),
+        ),
       },
     );
   }

@@ -106,4 +106,37 @@ abstract final class AppStrings {
   static const trainerQuickNotes = 'Quick notes';
   static const markComplete = 'Mark as complete';
   static const save = 'Save';
+
+  // ---- Trainer console ----
+  static const overview = 'Overview';
+  static const trainerConsole = 'Trainer Console';
+  static const loginTagline =
+      'Coach smarter. Members, calls and sessions in one place.';
+  static const loginHeading = 'Welcome back';
+  static const loginSubheading = 'Sign in to your trainer account';
+  static const goodMorning = 'Good morning';
+  static const goodAfternoon = 'Good afternoon';
+  static const goodEvening = 'Good evening';
+  static const todaysFocus = "TODAY'S FOCUS";
+  static String awaitingReview(int n) =>
+      n == 1 ? '1 request awaiting review' : '$n requests awaiting review';
+  static const focusPendingBody =
+      'Approve or decline to keep members on schedule.';
+  static const allCaughtUp = "You're all caught up";
+  static const allCaughtUpBody = 'New call requests will show up here.';
+  static const reviewRequests = 'Review requests';
+  static const needsAttention = 'Needs your attention';
+  static const seeAll = 'See all';
+  static const shortcuts = 'Shortcuts';
+  static const messagesShortcutBody = 'Reply to your members';
+  static const historyShortcutBody = 'Review past calls and notes';
+  static const pending = 'Pending';
+  static const newChat = 'New chat';
+  static const searchMembers = 'Search members';
+  static const noMembers = 'No members assigned yet';
+  static const noMatches = 'No members match your search';
+  static String memberCount(int n) => n == 1 ? '1 member' : '$n members';
+  static String pendingCount(int n) => n == 1 ? '1 pending' : '$n pending';
+  static const noPendingRequests = 'No pending requests';
+  static const unknownMember = 'Member';
 }

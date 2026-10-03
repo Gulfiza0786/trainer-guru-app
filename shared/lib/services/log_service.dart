@@ -15,18 +15,21 @@ abstract class LogService {
 class FirebaseLogService implements LogService {
   final FirebaseFirestore _db;
   FirebaseLogService({FirebaseFirestore? db})
-      : _db = db ?? FirebaseFirestore.instance;
+    : _db = db ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> get _logs =>
       _db.collection('sessionLogs');
 
   @override
-  Stream<List<SessionLog>> watch(String field, String userId) => _logs
-      .where(field, isEqualTo: userId)
-      .orderBy('startedAt', descending: true)
-      .snapshots()
-      .map((snap) =>
-          snap.docs.map((d) => SessionLog.fromMap(d.data())).toList());
+  Stream<List<SessionLog>> watch(String field, String userId) =>
+      _logs.where(field, isEqualTo: userId).snapshots().map((snap) {
+        final logs = snap.docs
+            .map((d) => SessionLog.fromMap(d.data()))
+            .toList();
+        // Sort client-side so no composite index is required in Firestore.
+        logs.sort((a, b) => b.startedAt.compareTo(a.startedAt));
+        return logs;
+      });
 
   @override
   Future<void> create(SessionLog log) async {

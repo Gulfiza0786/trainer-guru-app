@@ -6,6 +6,7 @@ import '../models/session_log.dart';
 import '../services/call_service.dart';
 import '../services/log_service.dart';
 import '../utils/app_exception.dart';
+import '../utils/app_strings.dart';
 import '../utils/validators.dart';
 import '../utils/wtf_logger.dart';
 
@@ -132,6 +133,10 @@ class CallCubit extends Cubit<CallState> {
       emit(const CallPreviewing());
     } on AppException catch (e) {
       emit(CallFailed(e.userMessage));
+    } catch (e) {
+      // Agora/permission plugin errors (e.g. no camera on an emulator).
+      WtfLog.d(LogTag.rtc, 'device check failed: $e');
+      emit(const CallFailed(AppStrings.genericError));
     }
   }
 
@@ -182,6 +187,9 @@ class CallCubit extends Cubit<CallState> {
       // onJoined callback emits CallInRoom.
     } on AppException catch (e) {
       emit(CallFailed(e.userMessage));
+    } catch (e) {
+      WtfLog.d(LogTag.rtc, 'join failed: $e');
+      emit(const CallFailed(AppStrings.genericError));
     }
   }
 
