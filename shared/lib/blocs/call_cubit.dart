@@ -94,6 +94,13 @@ class CallCubit extends Cubit<CallState> {
         _logs = logs,
         super(const CallIdle());
 
+  /// Async work (token fetch, engine callbacks) can finish after the call
+  /// screen is popped; drop those late states instead of throwing.
+  @override
+  void emit(CallState state) {
+    if (!isClosed) super.emit(state);
+  }
+
   String get _role =>
       me.role == UserRole.trainer ? room.roleTrainer : room.roleMember;
 

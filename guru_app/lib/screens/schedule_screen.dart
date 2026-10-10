@@ -120,6 +120,20 @@ class _ScheduleViewState extends State<_ScheduleView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // Quick-test shortcut: picks a slot 1 minute from now.
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        final t = DateTime.now().add(
+                          const Duration(minutes: 1),
+                        );
+                        cubit.pickSlot(
+                          DateTime(t.year, t.month, t.day, t.hour, t.minute),
+                        );
+                      },
+                      icon: const Icon(Icons.bolt_rounded, size: 18),
+                      label: const Text('Test slot: in 1 min'),
+                    ),
+                    const SizedBox(height: Gap.s16),
                     for (final group in _SlotGroup.values)
                       _SlotGroupView(
                         group: group,
